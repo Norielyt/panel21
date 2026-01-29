@@ -12,10 +12,11 @@ export async function GET() {
   try {
     const videos = await getAllVideos();
     return NextResponse.json(videos);
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     console.error('Error fetching videos:', error);
     return NextResponse.json(
-      { error: 'Error al obtener videos' },
+      { error: 'Error al obtener videos', detail: message },
       { status: 500 }
     );
   }
@@ -41,10 +42,11 @@ export async function POST(request: NextRequest) {
 
     const video = await createVideo(title, video_url, thumbnail_url || null);
     return NextResponse.json(video, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     console.error('Error creating video:', error);
     return NextResponse.json(
-      { error: 'Error al crear video' },
+      { error: 'Error al crear video', detail: message },
       { status: 500 }
     );
   }

@@ -55,7 +55,10 @@ export default function VideoForm({ videoId, initialData }: { videoId?: number; 
       });
 
       if (!response.ok) {
-        throw new Error('Error al guardar el video');
+        const data = await response.json().catch(() => ({}));
+        const detail = (data as { detail?: string }).detail;
+        const msg = (data as { error?: string }).error;
+        throw new Error(detail || msg || 'Error al guardar el video');
       }
 
       router.refresh();
