@@ -34,13 +34,16 @@ export default function VideoList() {
 
     try {
       const response = await fetch(`/api/videos/${id}`, {
-        method: 'DELETE',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete' }),
       });
 
       if (response.ok) {
         fetchVideos();
       } else {
-        alert('Error al eliminar el video');
+        const data = await response.json().catch(() => ({}));
+        alert((data as { error?: string }).error || 'Error al eliminar el video');
       }
     } catch (error) {
       alert('Error al eliminar el video');

@@ -66,6 +66,11 @@ export async function PUT(
   }
 }
 
+async function handleDelete(id: number) {
+  await deleteVideo(id);
+  return NextResponse.json({ success: true });
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -79,8 +84,43 @@ export async function DELETE(
 
   try {
     const id = parseInt(params.id);
-    await deleteVideo(id);
-    return NextResponse.json({ success: true });
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+    }
+    return handleDelete(id);
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    return NextResponse.json(
+      { error: 'Error al eliminar video' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { error: 'No autorizado' },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const id = parseInt(params.id);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
+    }
+    const body = await request.json().catch(() => ({}));
+    if ((body as { action?: string }).action !== 'delete') {
+      return NextResponse.json(
+        { error: 'Usa PUT para editar o action: "delete" para eliminar' },
+        { status: 400 }
+      );
+    }
+    return handleDelete(id);
   } catch (error) {
     console.error('Error deleting video:', error);
     return NextResponse.json(
