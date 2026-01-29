@@ -71,7 +71,7 @@ async function load() {
   return loadSettings();
 }
 
-export async function PUT(request: NextRequest) {
+async function handleSave(request: NextRequest) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
@@ -99,5 +99,13 @@ export async function PUT(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+export async function PUT(request: NextRequest) {
+  return handleSave(request);
+}
+
+export async function POST(request: NextRequest) {
+  return handleSave(request);
 }
 
