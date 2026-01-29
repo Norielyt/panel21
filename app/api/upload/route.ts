@@ -41,10 +41,23 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: blob.url });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error uploading file:', error);
+
+    // Mensaje más claro cuando falta el token o hay problema de Blob
+    const message = error?.message || '';
+    if (message.includes('BLOB_READ_WRITE_TOKEN')) {
+      return NextResponse.json(
+        {
+          error:
+            'Blob no configurado. Debes crear un Blob Store en Vercel y configurar la variable de entorno BLOB_READ_WRITE_TOKEN, luego hacer redeploy.',
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Error al subir el archivo' },
+      { error: 'Error al subir el archivo: ' + message },
       { status: 500 }
     );
   }
