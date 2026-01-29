@@ -4,6 +4,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Video Player',
   description: 'Reproductor de videos',
+  other: {
+    'fb:app_id': '1731936674147975',
+  },
 }
 
 export default function RootLayout({

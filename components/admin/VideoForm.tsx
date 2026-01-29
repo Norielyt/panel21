@@ -12,6 +12,7 @@ export default function VideoForm({ videoId, initialData }: { videoId?: number; 
     video_url: initialData?.video_url || '',
     thumbnail: null as File | null,
   });
+  const [useThumbnail, setUseThumbnail] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +22,8 @@ export default function VideoForm({ videoId, initialData }: { videoId?: number; 
     try {
       let thumbnailUrl = initialData?.thumbnail_url || null;
 
-      // Subir miniatura si hay una nueva
-      if (formData.thumbnail) {
+      // Subir miniatura solo si el usuario marcó la opción y seleccionó archivo
+      if (useThumbnail && formData.thumbnail) {
         const formDataToSend = new FormData();
         formDataToSend.append('file', formData.thumbnail);
         
@@ -60,6 +61,7 @@ export default function VideoForm({ videoId, initialData }: { videoId?: number; 
       router.refresh();
       if (!videoId) {
         setFormData({ title: '', video_url: '', thumbnail: null });
+        setUseThumbnail(false);
       }
       alert(videoId ? 'Video actualizado exitosamente' : 'Video creado exitosamente');
       if (videoId) {
@@ -98,14 +100,37 @@ export default function VideoForm({ videoId, initialData }: { videoId?: number; 
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Miniatura (opcional)</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files?.[0] || null })}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500"
-        />
-        {initialData?.thumbnail_url && !formData.thumbnail && (
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            id="useThumbnail"
+            type="checkbox"
+            checked={useThumbnail}
+            onChange={(e) => {
+              setUseThumbnail(e.target.checked);
+              if (!e.target.checked) {
+                setFormData({ ...formData, thumbnail: null });
+              }
+            }}
+            className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-700 rounded"
+          />
+          <label htmlFor="useThumbnail" className="text-sm font-medium">
+            Subir miniatura
+          </label>
+        </div>
+
+        {useThumbnail && (
+          <>
+            <label className="block text-sm font-medium mb-2">Miniatura (opcional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files?.[0] || null })}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500"
+            />
+          </>
+        )}
+
+        {initialData?.thumbnail_url && !formData.thumbnail && !useThumbnail && (
           <img src={initialData.thumbnail_url} alt="Thumbnail" className="mt-2 w-32 h-20 object-cover rounded" />
         )}
       </div>
