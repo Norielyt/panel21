@@ -4,6 +4,9 @@ import Link from 'next/link';
 import VideoPlayer from '@/components/VideoPlayer';
 import type { Metadata } from 'next';
 
+// Siempre datos frescos: sin caché para que borrar/crear videos se vea al instante
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   searchParams: { p?: string };
 }
@@ -15,6 +18,9 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     const video = await getVideoById(videoId);
     
     if (video) {
+      const ogImage = video.thumbnail_url
+        ? { url: video.thumbnail_url, width: 1200, height: 630, alt: video.title }
+        : { url: '/og-default.png', width: 1200, height: 630, alt: video.title };
       return {
         title: video.title,
         description: `Mira el video: ${video.title}`,
@@ -23,14 +29,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
           description: `Mira el video: ${video.title}`,
           type: 'video.other',
           url: `https://clippys.xyz/?p=${video.id}`,
-          images: video.thumbnail_url ? [
-            {
-              url: video.thumbnail_url,
-              width: 1200,
-              height: 630,
-              alt: video.title,
-            }
-          ] : [],
+          images: [ogImage],
           videos: [
             {
               url: video.video_url,
@@ -45,7 +44,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
           card: 'summary_large_image',
           title: video.title,
           description: `Mira el video: ${video.title}`,
-          images: video.thumbnail_url ? [video.thumbnail_url] : [],
+          images: [typeof ogImage.url === 'string' ? ogImage.url : '/og-default.png'],
         },
       };
     }

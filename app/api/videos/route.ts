@@ -11,7 +11,9 @@ async function isAuthenticated() {
 export async function GET() {
   try {
     const videos = await getAllVideos();
-    return NextResponse.json(videos);
+    const res = NextResponse.json(videos);
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return res;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     console.error('Error fetching videos:', error);

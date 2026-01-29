@@ -15,7 +15,7 @@ export default function VideoList() {
 
   const fetchVideos = async () => {
     try {
-      const response = await fetch('/api/videos');
+      const response = await fetch('/api/videos', { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setVideos(data);

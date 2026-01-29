@@ -18,7 +18,7 @@ async function loadVideos(): Promise<Video[]> {
       return [];
     }
 
-    const res = await fetch(blobs[0].url);
+    const res = await fetch(blobs[0].url, { cache: 'no-store' });
     if (!res.ok) {
       return [];
     }
