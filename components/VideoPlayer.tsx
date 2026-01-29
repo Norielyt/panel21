@@ -12,6 +12,12 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [loading, setLoading] = useState(true);
   const [overlayVisible, setOverlayVisible] = useState(true);
   const [adOpened, setAdOpened] = useState(false);
+  const [settings, setSettings] = useState({
+    adUrl: AD_URL,
+    telegramUrl: TELEGRAM_URL,
+    whatsappUrl: WHATSAPP_URL,
+    facebookUrl: FACEBOOK_URL,
+  });
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -22,11 +28,33 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await fetch('/api/settings', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        setSettings((prev) => ({
+          adUrl: typeof data.adUrl === 'string' ? data.adUrl || prev.adUrl : prev.adUrl,
+          telegramUrl:
+            typeof data.telegramUrl === 'string' ? data.telegramUrl || prev.telegramUrl : prev.telegramUrl,
+          whatsappUrl:
+            typeof data.whatsappUrl === 'string' ? data.whatsappUrl || prev.whatsappUrl : prev.whatsappUrl,
+          facebookUrl:
+            typeof data.facebookUrl === 'string' ? data.facebookUrl || prev.facebookUrl : prev.facebookUrl,
+        }));
+      } catch {
+        // ignorar errores, dejamos valores por defecto/env
+      }
+    };
+    loadSettings();
+  }, []);
+
   const handlePlay = async () => {
-    if (typeof window !== 'undefined' && AD_URL && !adOpened) {
+    if (typeof window !== 'undefined' && settings.adUrl && !adOpened) {
       try {
         // Intenta abrir el anuncio en una nueva pestaña/ventana
-        const newWin = window.open(AD_URL, '_blank', 'noopener,noreferrer');
+        window.open(settings.adUrl, '_blank', 'noopener,noreferrer');
         setAdOpened(true);
 
         // Intentar volver a enfocar la pestaña del video (comportamiento tipo popunder,
@@ -121,7 +149,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/90 flex items-center justify-center shadow-xl">
                   <span className="ml-1 border-l-[26px] border-l-black border-y-[16px] border-y-transparent md:border-l-[30px] md:border-y-[18px]" />
                 </div>
-                {AD_URL && !adOpened && (
+                {settings.adUrl && !adOpened && (
                   <p className="mt-4 text-sm md:text-base text-gray-200 font-medium px-4 text-center">
                     Serás enviado a una página de anuncio y luego empezará el video.
                   </p>
@@ -157,9 +185,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           </span>
         </button>
 
-        {TELEGRAM_URL && (
+        {settings.telegramUrl && (
           <a
-            href={TELEGRAM_URL}
+            href={settings.telegramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-400 text-white flex items-center justify-center shadow-lg hover:scale-110 transition"
@@ -169,7 +197,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           </a>
         )}
 
-        {WHATSAPP_URL && (
+        {settings.whatsappUrl && (
           <a
             href={`https://wa.me/?text=${shareTextEncoded}%20${shareUrlEncoded}`}
             target="_blank"
@@ -181,9 +209,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           </a>
         )}
 
-        {FACEBOOK_URL && (
+        {settings.facebookUrl && (
           <a
-            href={FACEBOOK_URL}
+            href={settings.facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition"
