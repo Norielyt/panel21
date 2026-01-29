@@ -31,9 +31,7 @@ export const metadata: Metadata = {
     description: 'Reproductor de videos',
     images: [defaultOgImage],
   },
-  other: {
-    'fb:app_id': '1731936674147975',
-  },
+  // fb:app_id va solo en <head> con property= (Facebook exige "property", no "name")
 }
 
 export default function RootLayout({
